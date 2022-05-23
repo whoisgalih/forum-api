@@ -1,4 +1,4 @@
-const RegisterThread = require('../../Domains/threads/entities/RegisterThread');
+const AddThread = require('../../Domains/threads/entities/AddThread');
 
 class AddThreadUseCase {
   constructor({ threadRepository }) {
@@ -6,8 +6,8 @@ class AddThreadUseCase {
   }
 
   async execute(useCasePayload) {
-    const registerThread = new RegisterThread(useCasePayload);
-    return this._threadRepository.addThread(registerThread);
+    const addThread = new AddThread(useCasePayload);
+    return this._threadRepository.addThread(addThread);
   }
 }
 
