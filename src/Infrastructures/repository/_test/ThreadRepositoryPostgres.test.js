@@ -67,7 +67,7 @@ describe('ThreadRepositoryPostgres', () => {
         const threadRepositoryPostgres = new ThreadRepositoryPostgres(pool, {});
 
         // Action & Assert
-        return expect(threadRepositoryPostgres.getThreadById('thread-123')).rejects.toThrowError(NotFoundError);
+        return expect(threadRepositoryPostgres.getThreadById({ id: 'thread-123' })).rejects.toThrowError(NotFoundError);
       });
 
       it('should get detail thread', async () => {
@@ -90,7 +90,7 @@ describe('ThreadRepositoryPostgres', () => {
         const threadRepositoryPostgres = new ThreadRepositoryPostgres(pool, {});
 
         // Action
-        const threadDetail = await threadRepositoryPostgres.getThreadById(threadPayload.id);
+        const threadDetail = await threadRepositoryPostgres.getThreadById({ id: threadPayload.id });
 
         // Assert
         expect(threadDetail.id).toEqual(threadPayload.id);
