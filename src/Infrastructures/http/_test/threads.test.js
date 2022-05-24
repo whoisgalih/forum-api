@@ -1,6 +1,6 @@
 const pool = require('../../database/postgres/pool');
 const UsersTableTestHelper = require('../../../../tests/UsersTableTestHelper');
-const ServerTestHelper = require('../../../../tests/ServerTestHelper');
+// const ServerTestHelper = require('../../../../tests/ServerTestHelper');
 const ThreadsTableTestHelper = require('../../../../tests/ThreadsTableTestHelper');
 const container = require('../../container');
 const createServer = require('../createServer');
@@ -12,6 +12,7 @@ describe('/threads endpoint', () => {
 
   afterEach(async () => {
     await UsersTableTestHelper.cleanTable();
+    await ThreadsTableTestHelper.cleanTable();
   });
 
   describe('when POST /threads', () => {
@@ -196,7 +197,7 @@ describe('/threads endpoint', () => {
   });
 
   describe('when GET /threads/{threadId}', () => {
-    it('should response 200 for existing', async () => {
+    it('should response 201 and response with correct value', async () => {
       // Arrange
       const userPayload = {
         id: 'user-123',
@@ -211,7 +212,7 @@ describe('/threads endpoint', () => {
         owner: userPayload.id,
       };
 
-      await ServerTestHelper.getAccessToken(userPayload);
+      await UsersTableTestHelper.addUser(userPayload);
       await ThreadsTableTestHelper.addThread(threadPayload);
       const server = await createServer(container);
 
@@ -233,22 +234,22 @@ describe('/threads endpoint', () => {
       expect(responseJson.data.thread.username).toEqual(userPayload.username);
     });
 
-    // it('should response 404 if thread not found', async () => {
-    //   // Arrange
-    //   const threadId = 'thread-randomly';
-    //   const server = await createServer(container);
+    it('should response 404 if thread not found', async () => {
+      // Arrange
+      const threadId = 'thread-123';
+      const server = await createServer(container);
 
-    //   // Action
-    //   const response = await server.inject({
-    //     method: 'GET',
-    //     url: `/threads/${threadId}`,
-    //   });
+      // Action
+      const response = await server.inject({
+        method: 'GET',
+        url: `/threads/${threadId}`,
+      });
 
-    //   // Assert
-    //   const responseJson = JSON.parse(response.payload);
-    //   expect(response.statusCode).toEqual(404);
-    //   expect(responseJson.status).toEqual('fail');
-    //   expect(responseJson.message).toEqual('thread tidak ditemukan');
-    // });
+      // Assert
+      const responseJson = JSON.parse(response.payload);
+      expect(response.statusCode).toEqual(404);
+      expect(responseJson.status).toEqual('fail');
+      expect(responseJson.message).toEqual('thread tidak ditemukan');
+    });
   });
 });
