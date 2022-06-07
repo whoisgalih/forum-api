@@ -6,6 +6,7 @@ const AddThread = require('../../../Domains/threads/entities/AddThread');
 const UsersTableTestHelper = require('../../../../tests/UsersTableTestHelper');
 const AddedThread = require('../../../Domains/threads/entities/AddedThread');
 const NotFoundError = require('../../../Commons/exceptions/NotFoundError');
+const CommentsTableTestHelper = require('../../../../tests/CommentsTableTestHelper');
 
 describe('ThreadRepositoryPostgres', () => {
   it('should be instance of ThreadRepository domain', () => {
@@ -87,6 +88,7 @@ describe('ThreadRepositoryPostgres', () => {
         };
 
         await ThreadsTableTestHelper.addThread(threadPayload);
+
         const threadRepositoryPostgres = new ThreadRepositoryPostgres(pool, {});
 
         // Action

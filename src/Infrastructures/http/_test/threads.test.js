@@ -1,6 +1,7 @@
 const pool = require('../../database/postgres/pool');
 const UsersTableTestHelper = require('../../../../tests/UsersTableTestHelper');
 const ThreadsTableTestHelper = require('../../../../tests/ThreadsTableTestHelper');
+const CommentsTableTestHelper = require('../../../../tests/CommentsTableTestHelper');
 const container = require('../../container');
 const createServer = require('../createServer');
 
@@ -196,7 +197,7 @@ describe('/threads endpoint', () => {
   });
 
   describe('when GET /threads/{threadId}', () => {
-    it('should response 201 and response with correct value', async () => {
+    it('should response 200 and response with correct value', async () => {
       // Arrange
       const userPayload = {
         id: 'user-123',
@@ -211,8 +212,25 @@ describe('/threads endpoint', () => {
         owner: userPayload.id,
       };
 
+      const comment1 = {
+        id: 'comment-123',
+        body: 'a comment body',
+        owner: userPayload.id,
+        thread: threadPayload.id,
+      };
+
+      const comment2 = {
+        id: 'comment-456',
+        body: 'a comment body',
+        owner: userPayload.id,
+        thread: threadPayload.id,
+        is_deleted: true,
+      };
+
       await UsersTableTestHelper.addUser(userPayload);
       await ThreadsTableTestHelper.addThread(threadPayload);
+      await CommentsTableTestHelper.addComment(comment1);
+      await CommentsTableTestHelper.addComment(comment2);
       const server = await createServer(container);
 
       // Action
@@ -223,7 +241,7 @@ describe('/threads endpoint', () => {
 
       // Assert
       const responseJson = JSON.parse(response.payload);
-      expect(response.statusCode).toEqual(201);
+      expect(response.statusCode).toEqual(200);
       expect(responseJson.status).toEqual('success');
       expect(responseJson.data.thread).toBeDefined();
       // expect(responseJson.data.thread).toEqual('');

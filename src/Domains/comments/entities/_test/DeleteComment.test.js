@@ -1,4 +1,3 @@
-const { payload } = require('@hapi/hapi/lib/validation');
 const DeleteComment = require('../DeleteComment');
 
 describe('DeleteComment', () => {

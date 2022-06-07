@@ -37,6 +37,18 @@ DomainErrorTranslator._directories = {
   // Delete Authenticatioon
   'DELETE_AUTHENTICATION_USE_CASE.NOT_CONTAIN_REFRESH_TOKEN': new InvariantError('harus mengirimkan token refresh'),
   'DELETE_AUTHENTICATION_USE_CASE.PAYLOAD_NOT_MEET_DATA_TYPE_SPECIFICATION': new InvariantError('refresh token harus string'),
+
+  // Comment In Thread
+  'COMMENTS_IN_THREAD.NOT_CONTAIN_NEEDED_PROPERTY': new InvariantError('tidak dapat mengambil comments karena properti yang dibutuhkan tidak ada'),
+  'COMMENTS_IN_THREAD.NOT_MEET_DATA_TYPE_SPECIFICATION': new InvariantError('tidak dapat mengambil comments karena tipe data tidak sesuai'),
+
+  // Comment
+  'COMMENT.NOT_CONTAIN_NEEDED_PROPERTY': new InvariantError('tidak dapat mengambil comment karena properti yang dibutuhkan tidak ada'),
+  'COMMENT.NOT_MEET_DATA_TYPE_SPECIFICATION': new InvariantError('tidak dapat mengambil comment karena tipe data tidak sesuai'),
+
+  // Get Thread
+  'GET_THREAD.NOT_CONTAIN_NEEDED_PROPERTY': new InvariantError('tidak dapat mengambil thread karena properti yang dibutuhkan tidak ada'),
+  'GET_THREAD.NOT_MEET_DATA_TYPE_SPECIFICATION': new InvariantError('tidak dapat mengambil thread karena tipe data tidak sesuai'),
 };
 
 module.exports = DomainErrorTranslator;

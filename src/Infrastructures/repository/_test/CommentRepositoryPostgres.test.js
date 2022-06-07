@@ -19,6 +19,7 @@ describe('CommentRepositoryPostgres', () => {
   describe('behavior test', () => {
     afterEach(async () => {
       await CommentsTableTestHelper.cleanTable();
+      await ThreadsTableTestHelper.cleanTable();
       await UsersTableTestHelper.cleanTable();
     });
 
@@ -68,6 +69,38 @@ describe('CommentRepositoryPostgres', () => {
             owner: userPayload.id,
           })
         );
+      });
+    });
+
+    describe('verifyIfCommentExists function', () => {
+      it('should throw error if comment not exist', async () => {
+        // Arrange
+        const userPayload = {
+          id: 'user-123',
+        };
+
+        await UsersTableTestHelper.addUser(userPayload);
+
+        const threadPayload = {
+          id: 'thread-123',
+          title: 'some title',
+          body: 'some thread',
+          owner: userPayload.id,
+        };
+
+        await ThreadsTableTestHelper.addThread(threadPayload);
+
+        const commentPayload = {
+          threadId: 'thread-123',
+          content: 'a content',
+          owner: userPayload.id,
+        };
+
+        const fakeIdGenerator = () => '123';
+        const commentRepositoryPostgres = new CommentRepositoryPostgres(pool, fakeIdGenerator);
+
+        // Action & Assert
+        await expect(commentRepositoryPostgres.verifyIfCommentExists({ id: 'comment-123' })).rejects.toThrow(NotFoundError);
       });
     });
 
@@ -153,44 +186,61 @@ describe('CommentRepositoryPostgres', () => {
       });
     });
 
-    // describe('getCommentById function', () => {
-    //   it('should throw InvariantError when comment not found', async () => {
-    //     // Arrange
-    //     const commentRepositoryPostgres = new CommentRepositoryPostgres(pool, {});
+    describe('getCommentByThreadId function', () => {
+      it('should get all comment in specified thread', async () => {
+        // Arrange
+        const userPayload = {
+          id: 'user-123',
+          username: 'unique_username',
+        };
 
-    //     // Action & Assert
-    //     return expect(commentRepositoryPostgres.getCommentById({ id: 'comment-123' })).rejects.toThrowError(NotFoundError);
-    //   });
+        await UsersTableTestHelper.addUser(userPayload);
 
-    //   it('should get detail comment', async () => {
-    //     // Arrange
-    //     const userPayload = {
-    //       id: 'user-123',
-    //       username: 'unique_username',
-    //     };
+        const threadPayload = {
+          id: 'thread-123',
+          title: 'some title',
+          body: 'some thread',
+          owner: userPayload.id,
+        };
 
-    //     await UsersTableTestHelper.addUser(userPayload);
+        await ThreadsTableTestHelper.addThread(threadPayload);
 
-    //     const commentPayload = {
-    //       id: 'comment-123',
-    //       threadId: 'thread-123',
-    //       content: 'a content',
-    //       owner: userPayload.id,
-    //     };
+        const commentPayload = {
+          id: 'comment-123',
+          threadId: threadPayload.id,
+          content: 'a content',
+          owner: userPayload.id,
+          isDeleted: false,
+        };
 
-    //     await CommentsTableTestHelper.addComment(commentPayload);
-    //     const commentRepositoryPostgres = new CommentRepositoryPostgres(pool, {});
+        const commentPayload2 = {
+          id: 'comment-124',
+          threadId: threadPayload.id,
+          content: 'a content',
+          owner: userPayload.id,
+          isDeleted: true,
+        };
 
-    //     // Action
-    //     const commentDetail = await commentRepositoryPostgres.getCommentById({ id: commentPayload.id });
+        await CommentsTableTestHelper.addComment(commentPayload);
+        await CommentsTableTestHelper.addComment(commentPayload2);
+        const commentRepositoryPostgres = new CommentRepositoryPostgres(pool, {});
 
-    //     // Assert
-    //     expect(commentDetail.id).toEqual(commentPayload.id);
-    //     expect(commentDetail.threadId).toEqual(commentPayload.threadId);
-    //     expect(commentDetail.content).toEqual(commentPayload.content);
-    //     expect(commentDetail.owner).toEqual(userPayload.owner);
-    //   });
-    // });
+        // Action
+        const comments = await commentRepositoryPostgres.getCommentsByThreadId({ id: threadPayload.id });
+
+        // Assert
+        expect(comments).toHaveLength(2);
+        // expect(comments).toStrictEqual('');
+        expect(comments[0].id).toStrictEqual(commentPayload.id);
+        expect(comments[0].content).toStrictEqual(commentPayload.content);
+        expect(comments[0].username).toStrictEqual(userPayload.username);
+        expect(comments[0].isDeleted).toStrictEqual(false);
+        expect(comments[1].id).toStrictEqual(commentPayload2.id);
+        expect(comments[1].username).toStrictEqual(userPayload.username);
+        expect(comments[1].content).toStrictEqual(commentPayload2.content);
+        expect(comments[1].isDeleted).toStrictEqual(commentPayload2.isDeleted);
+      });
+    });
 
     describe('deleteComment function', () => {
       it('should throw InvariantError when comment not found', async () => {
