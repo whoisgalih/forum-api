@@ -90,6 +90,30 @@ describe('CommentRepositoryPostgres', () => {
 
         await ThreadsTableTestHelper.addThread(threadPayload);
 
+        const fakeIdGenerator = () => '123';
+        const commentRepositoryPostgres = new CommentRepositoryPostgres(pool, fakeIdGenerator);
+
+        // Action & Assert
+        await expect(commentRepositoryPostgres.verifyIfCommentExists({ id: 'comment-123' })).rejects.toThrow(NotFoundError);
+      });
+
+      it('should not throw error if comment exist', async () => {
+        // Arrange
+        const userPayload = {
+          id: 'user-123',
+        };
+
+        await UsersTableTestHelper.addUser(userPayload);
+
+        const threadPayload = {
+          id: 'thread-123',
+          title: 'some title',
+          body: 'some thread',
+          owner: userPayload.id,
+        };
+
+        await ThreadsTableTestHelper.addThread(threadPayload);
+
         const commentPayload = {
           threadId: 'thread-123',
           content: 'a content',
@@ -99,8 +123,10 @@ describe('CommentRepositoryPostgres', () => {
         const fakeIdGenerator = () => '123';
         const commentRepositoryPostgres = new CommentRepositoryPostgres(pool, fakeIdGenerator);
 
+        const addedComment = await commentRepositoryPostgres.addComment(new AddComment(commentPayload));
+
         // Action & Assert
-        await expect(commentRepositoryPostgres.verifyIfCommentExists({ id: 'comment-123' })).rejects.toThrow(NotFoundError);
+        await expect(commentRepositoryPostgres.verifyIfCommentExists({ id: addedComment.id })).resolves.not.toThrow(NotFoundError);
       });
     });
 
