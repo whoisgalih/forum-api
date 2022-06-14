@@ -42,7 +42,13 @@ describe('CommentsInThread', () => {
 
     // Assert
     expect(result).toHaveLength(2);
+    expect(result[0].id).toBe(comments[0].id);
+    expect(result[0].username).toBe(comments[0].username);
     expect(result[0].content).toEqual(comments[0].content);
+    expect(result[0].date).toBe(comments[0].date);
+    expect(result[1].id).toBe(comments[1].id);
+    expect(result[1].username).toBe(comments[1].username);
     expect(result[1].content).toEqual('**komentar telah dihapus**');
+    expect(result[1].date).toBe(comments[1].date);
   });
 });

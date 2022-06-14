@@ -204,11 +204,8 @@ describe('CommentRepositoryPostgres', () => {
           owner: 'user-123',
         };
 
-        const spy = jest.spyOn(commentRepositoryPostgres, 'verifyCommentOwner');
-        commentRepositoryPostgres.verifyCommentOwner(trueOwner);
-
         // Action & Assert
-        expect(spy).toBeCalledWith(trueOwner);
+        await expect(commentRepositoryPostgres.verifyCommentOwner(trueOwner)).resolves.not.toThrowError();
       });
     });
 

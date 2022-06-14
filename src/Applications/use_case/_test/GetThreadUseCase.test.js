@@ -4,69 +4,57 @@ const GetThreadUseCase = require('../GetThreadUseCase');
 
 describe('GetThreadUseCase', () => {
   it('should get return detail thread correctly', async () => {
+    // Arrange
     const useCasePayload = {
       id: 'thread-123',
     };
 
-    const date = new Date().toISOString();
-
-    const expectedThread = {
+    const threadFromDatabase = {
       id: useCasePayload.id,
-      title: 'some title',
-      body: 'some body',
-      date,
-      username: 'whoisgalih',
-      comments: [
-        {
-          id: 'comment-123',
-          content: 'a content',
-          date,
-          username: 'whoisgalih',
-        },
-        {
-          id: 'comment-124',
-          content: '**komentar telah dihapus**',
-          date,
-          username: 'whoisgalih',
-        },
-      ],
+      body: 'hello title body',
+      title: 'existing title',
+      date: new Date().toISOString(),
+      username: 'user123',
     };
 
+    const commentsFromDatabase = [
+      {
+        id: 'comment-123',
+        username: 'WFdvrs',
+        date: new Date(),
+        content: 'rwgfiukwbfoi',
+        isDeleted: false,
+      },
+      {
+        id: 'comment-124',
+        username: 'svbk',
+        date: new Date(),
+        content: 'schkvludiewhoi',
+        isDeleted: true,
+      },
+    ];
+
+    /** creating dependency of use case */
     const mockThreadRepository = new ThreadRepository();
     const mockCommentRepository = new CommentRepository();
 
-    mockThreadRepository.getThreadById = jest.fn().mockImplementation(() => Promise.resolve(expectedThread));
-    mockCommentRepository.getCommentsByThreadId = jest.fn().mockImplementation(() =>
-      Promise.resolve([
-        {
-          id: 'comment-123',
-          content: 'a content',
-          username: 'whoisgalih',
-          date,
-          isDeleted: false,
-        },
-        {
-          id: 'comment-124',
-          content: 'b content',
-          username: 'whoisgalih',
-          date,
-          isDeleted: true,
-        },
-      ])
-    );
+    /** mocking needed function */
+    mockThreadRepository.getThreadById = jest.fn().mockImplementation(() => Promise.resolve(threadFromDatabase));
+    mockCommentRepository.getCommentsByThreadId = jest.fn().mockImplementation(() => Promise.resolve(commentsFromDatabase));
 
-    const detailThreadUseCase = new GetThreadUseCase({
+    /** creating use case instance */
+    const getThreadUseCase = new GetThreadUseCase({
       threadRepository: mockThreadRepository,
       commentRepository: mockCommentRepository,
     });
 
-    const detailThread = await detailThreadUseCase.execute(useCasePayload);
+    // Action
+    const existingThread = await getThreadUseCase.execute(useCasePayload);
 
-    expect(mockThreadRepository.getThreadById).toHaveBeenCalledWith(useCasePayload);
-    expect(mockCommentRepository.getCommentsByThreadId).toHaveBeenCalledWith({ id: useCasePayload.id });
-    expect(detailThread).toStrictEqual(expectedThread);
-    expect(detailThread.comments).toHaveLength(2);
-    expect(detailThread.comments[0].content).toBe('a content');
-    expect(detailThread.comments[1].content).toBe('**komentar telah dihapus**');
+    // Assert
+    // make sure function called
+    expect(existingThread).toStrictEqual(threadFromDatabase);
+    expect(mockThreadRepository.getThreadById).toBeCalledWith(useCasePayload);
+    expect(mockCommentRepository.getCommentsByThreadId).toBeCalledWith(useCasePayload);
   });
 });
