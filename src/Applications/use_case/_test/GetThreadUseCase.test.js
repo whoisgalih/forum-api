@@ -9,38 +9,38 @@ describe('GetThreadUseCase', () => {
       id: 'thread-123',
     };
 
-    const threadFromDatabase = {
-      id: useCasePayload.id,
-      body: 'hello title body',
-      title: 'existing title',
-      date: new Date().toISOString(),
-      username: 'user123',
-    };
-
-    const commentsFromDatabase = [
-      {
-        id: 'comment-123',
-        username: 'WFdvrs',
-        date: new Date(),
-        content: 'rwgfiukwbfoi',
-        isDeleted: false,
-      },
-      {
-        id: 'comment-124',
-        username: 'svbk',
-        date: new Date(),
-        content: 'schkvludiewhoi',
-        isDeleted: true,
-      },
-    ];
-
     /** creating dependency of use case */
     const mockThreadRepository = new ThreadRepository();
     const mockCommentRepository = new CommentRepository();
 
     /** mocking needed function */
-    mockThreadRepository.getThreadById = jest.fn().mockImplementation(() => Promise.resolve(threadFromDatabase));
-    mockCommentRepository.getCommentsByThreadId = jest.fn().mockImplementation(() => Promise.resolve(commentsFromDatabase));
+    mockThreadRepository.getThreadById = jest.fn().mockImplementation(() =>
+      Promise.resolve({
+        id: useCasePayload.id,
+        body: 'hello title body',
+        title: 'existing title',
+        date: '2022-01-01T00:00:00.000Z',
+        username: 'user123',
+      })
+    );
+    mockCommentRepository.getCommentsByThreadId = jest.fn().mockImplementation(() =>
+      Promise.resolve([
+        {
+          id: 'comment-123',
+          username: 'WFdvrs',
+          date: '2022-01-01T00:00:00.000Z',
+          content: 'rwgfiukwbfoi',
+          isDeleted: false,
+        },
+        {
+          id: 'comment-124',
+          username: 'svbk',
+          date: '2020-01-01T00:00:00.000Z',
+          content: 'schkvludiewhoi',
+          isDeleted: true,
+        },
+      ])
+    );
 
     /** creating use case instance */
     const getThreadUseCase = new GetThreadUseCase({
@@ -52,9 +52,29 @@ describe('GetThreadUseCase', () => {
     const existingThread = await getThreadUseCase.execute(useCasePayload);
 
     // Assert
-    // make sure function called
-    expect(existingThread).toStrictEqual(threadFromDatabase);
     expect(mockThreadRepository.getThreadById).toBeCalledWith(useCasePayload);
     expect(mockCommentRepository.getCommentsByThreadId).toBeCalledWith(useCasePayload);
+
+    expect(existingThread).toEqual({
+      id: useCasePayload.id,
+      body: 'hello title body',
+      title: 'existing title',
+      date: '2022-01-01T00:00:00.000Z',
+      username: 'user123',
+      comments: [
+        {
+          id: 'comment-123',
+          username: 'WFdvrs',
+          date: '2022-01-01T00:00:00.000Z',
+          content: 'rwgfiukwbfoi',
+        },
+        {
+          id: 'comment-124',
+          username: 'svbk',
+          date: '2020-01-01T00:00:00.000Z',
+          content: '**komentar telah dihapus**',
+        },
+      ],
+    });
   });
 });
