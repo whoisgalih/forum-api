@@ -1,1 +1,1 @@
-TRUNCATE authentications, comments, threads, users;
+TRUNCATE authentications, users;
